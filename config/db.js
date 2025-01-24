@@ -1,21 +1,35 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
-const dotenv = require('dotenv');
+class Database {
+	constructor() {
+		const postgres = require('postgres');
+		const dotenv = require('dotenv');
+		dotenv.config();
+		this.sql = postgres({
+			host: process.env.POSTGRES_URL,
+			port: 5432,
+			database: process.env.DB_NAME,
+			username: process.env.DB_USERNAME,
+			password: process.env.DB_PASSWORD,
+		});
+	}
 
-// Cargar variables de entorno
-dotenv.config();
+	async studentById(id) {
+		const resp = await this.sql`
+			select
+				id,
+				name,
+				email
+			from students
+			where
+				id = ${id}
+		`;
+		console.log(resp[0]);
+		return resp[0];
+	}
 
-// Configurar cliente de AWS
-const dynamoDBClient = new DynamoDBClient({
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    sessionToken: process.env.AWS_SESSION_TOKEN
-  }
-});
+	async insertStudent(student) {
+		await this.sql`insert into students ${this.sql(student, 'name', 'email', 'password')
+			}`;
+	}
+}
 
-// Crear cliente de documento de DynamoDB para operaciones más sencillas
-const docClient = DynamoDBDocumentClient.from(dynamoDBClient);
-
-module.exports =  docClient;
+module.exports = Database;
