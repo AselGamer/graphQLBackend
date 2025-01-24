@@ -1,0 +1,5 @@
+POSTGRES_URL=localhost
+DB_NAME=reto
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+SECRET=abc1234567
