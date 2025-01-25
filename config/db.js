@@ -17,18 +17,112 @@ class Database {
 			select
 				id,
 				name,
-				email
+				email,
+				password
 			from students
 			where
 				id = ${id}
 		`;
-		console.log(resp[0]);
 		return resp[0];
+	}
+
+	async studentByEmail(email) {
+		const resp = await this.sql`
+			select
+				id,
+				name,
+				email,
+				password
+			from students
+			where
+				email = ${email}
+		`;
+		return resp[0];
+	}
+
+	async attendanceByStudentId(studentid) {
+		const resp = await this.sql`
+			select
+				id,
+				studentid,
+				coursecode,
+				entradafecha,
+				salidafecha,
+				entradaubicacion,
+				salidaubicacion,
+				entradaip,
+				salidaip,
+				entradamac,
+				salidamac,
+				totalhoras
+			from attendances
+			where
+				studentid = ${studentid}
+		`;
+		return resp;
+	}
+
+	async getAttendanceById(id) {
+		const resp = await this.sql`
+			select
+				id,
+				studentid,
+				coursecode,
+				entradafecha,
+				salidafecha,
+				entradaubicacion,
+				salidaubicacion,
+				entradaip,
+				salidaip,
+				entradamac,
+				salidamac,
+				totalhoras
+			from attendances
+			where
+				id = ${id}
+		`;
+		return resp[0];
+	}
+
+	async getAllAtendancesByStudentId(studentId) {
+		const resp = await this.sql`
+			select
+				id,
+				studentid,
+				coursecode,
+				entradafecha,
+				salidafecha,
+				entradaubicacion,
+				salidaubicacion,
+				entradaip,
+				salidaip,
+				entradamac,
+				salidamac,
+				totalhoras
+			from attendances
+			where
+				studentid = ${studentId}
+		`;
+		return resp;
 	}
 
 	async insertStudent(student) {
 		await this.sql`insert into students ${this.sql(student, 'name', 'email', 'password')
 			}`;
+	}
+
+	async insertAttendance(attendance) {
+		const resp = await this.sql`insert into attendances ${this.sql(attendance, 'studentid', 'coursecode', 'entradafecha', 'entradaubicacion', 'entradaip', 'entradamac')} returning id`;
+		return resp[0]['id'];
+	}
+
+	async addExitToAttendance(attendanceId, params) {
+		const resp = await this.sql`update attendances set ${this.sql(params, 'salidafecha', 'salidaubicacion', 'salidaip', 'salidamac', 'totalhoras')} where id = ${attendanceId} returning attendances.*`;
+		return resp[0];
+	}
+
+	async updatePassword(id, newPassword) {
+		await this.sql`update students set password = ${newPassword} where id = ${id}`;
 	}
 }
 

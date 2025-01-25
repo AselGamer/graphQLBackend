@@ -21,8 +21,7 @@ startStandaloneServer(server, {
         //si hay token
         if (token) {
             try {
-                const alumno= jwt.verify(token.replace('Bearer ', ''),process.env.SECRETA);
-                console.log("alumno verificado", alumno);
+                const alumno= jwt.verify(token.replace('Bearer ', ''),process.env.SECRET);
                 return { alumno ,token };
             } catch (error) {
                 console.log("Error de token",error);

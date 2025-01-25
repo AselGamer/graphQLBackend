@@ -15,11 +15,10 @@ const crearToken = (alumno, secreta, expiresIn) => {
 const resolvers = {
 	Query: {
 		obtenerAlumno: async (_, { id }, ctx) => {
-			/* console.log(ctx.token);
-			const token = ctx.token; 
+			const token = ctx.token;
 			if (!token) {
-			  throw new Error('No autorizado: El token es necesario');
-			} */
+				throw new Error('No autorizado: El token es necesario');
+			}
 
 			try {
 				const student = await database.studentById(id);
@@ -28,59 +27,34 @@ const resolvers = {
 				throw error;
 			}
 		},
-		/*
-			obtenerAsistencias: async (_, { studentId }, ctx) => {
-			  const token = ctx.token;
-			  if (!token) {
+		obtenerAsistencias: async (_, { studentId }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
 				throw new Error('No autorizado: El token es necesario');
-			  }
-			  const params = {
-				TableName: 'Asistencias',
-				FilterExpression: 'studentId = :studentId',
-				ExpressionAttributeValues: {
-				  ':studentId': studentId
-				}
-			  };
-		
-			  try {
-				const { Items } = await docClient.send(new ScanCommand(params));
-				return Items;
-			  } catch (error) {
+			}
+
+			try {
+				const attendances = await database.attendanceByStudentId(studentId);
+				return attendances;
+			} catch (error) {
 				throw error;
-			  }
-			},
-		
-			obtenerHorasAsistencia: async (_, { studentId }, ctx) => {
-			  const token = ctx.token;  
-			  if (!token) {
+			}
+		},
+
+		obtenerHorasAsistencia: async (_, { studentId }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
 				throw new Error('No autorizado: El token es necesario');
-			  }
-			  const params = {
-				TableName: 'Asistencias',
-				FilterExpression: 'studentId = :studentId',
-				ExpressionAttributeValues: {
-				  ':studentId': studentId
-				}
-			  };
-		
-			  try {
-				const { Items } = await docClient.send(new ScanCommand(params));
-				const totalHoras = Items.reduce((sum, asistencia) => sum + (asistencia.totalHoras || 0), 0);
+			}
+
+			try {
+				const attendances = await database.getAllAtendancesByStudentId(studentId);
+				const totalHoras = attendances.reduce((sum, asistencia) => sum + (asistencia.totalhoras || 0), 0);
 				return totalHoras;
-			  } catch (error) {
+			} catch (error) {
 				throw error;
-			  }
-			},
-		
-			obtenerStudentId: async (_, { token }) => {
-			  try {
-				const tokenSesion = jwt.verify(token, process.env.SECRETA);  
-				return tokenSesion.id;  
-			  } catch (error) {
-				console.error('Token inválido o expirado:', error);
-				return null; 
-			  }
-			} */
+			}
+		},
 	},
 	Mutation: {
 		registrarAlumno: async (_, { nombre, email, password }) => {
@@ -105,161 +79,123 @@ const resolvers = {
 			}
 		},
 
-		/*
-			iniciarSesion: async (_, { email, password }) => {
-			  const params = {
-				TableName: 'Estudiantes',
-				FilterExpression: 'email = :email',
-				ExpressionAttributeValues: {
-				  ':email': email
-				}
-			  };
-		
-			  try {
-				const { Items } = await docClient.send(new ScanCommand(params));
-				const student = Items[0];
-		
-				if (!student) {
-				  throw new Error('Credenciales inválidas');
-				}
-		
+		iniciarSesion: async (_, { email, password }) => {
+			try {
+				const student = await database.studentByEmail(email);
+
 				const isValid = await bcrypt.compare(password, student.password);
 				if (!isValid) {
-				  throw new Error('Credenciales inválidas');
+					throw new Error('Credenciales inválidas');
 				}
-		
-				const token = crearToken(student,process.env.SECRETA,'4hr');
+
+				const token = crearToken(student, process.env.SECRET, '4hr');
 				return {
-				  token,
-				  student
+					token,
+					student
 				};
-			  } catch (error) {
+			} catch (error) {
 				throw error;
-			  }
-			},
-		
-			cambiarContrasena: async (_, { email, contrasenaActual, contrasenaNueva }, ctx) => {
-			  const token = ctx.token; 
-			  if (!token) {
+			}
+		},
+
+		cambiarContrasena: async (_, { email, contrasenaActual, contrasenaNueva }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
 				throw new Error('No autorizado: El token es necesario');
-			  }
-			  const params = {
-				TableName: 'Estudiantes',
-				FilterExpression: 'email = :email',
-				ExpressionAttributeValues: {
-				  ':email': email
-				}
-			  };
-		
-			  try {
-				const { Items } = await docClient.send(new ScanCommand(params));
-				const student = Items[0];
-		
+			}
+
+			try {
+				const student = await database.studentByEmail(email);
+
 				if (!student) {
-				  throw new Error('Estudiante no encontrado');
+					throw new Error('Estudiante no encontrado');
 				}
-		
+
 				const isValid = await bcrypt.compare(contrasenaActual, student.password);
 				if (!isValid) {
-				  throw new Error('Contraseña actual incorrecta');
+					throw new Error('Contraseña actual incorrecta');
 				}
-		
+
 				const hashedNewPassword = await bcrypt.hash(contrasenaNueva, 10);
-		
-				const updateParams = {
-				  TableName: 'Estudiantes',
-				  Key: { id: student.id },
-				  UpdateExpression: 'SET password = :newPassword',
-				  ExpressionAttributeValues: {
-					':newPassword': hashedNewPassword
-				  }
-				};
-		
-				await docClient.send(new UpdateCommand(updateParams));
+
+				await database.updatePassword(student.id, hashedNewPassword);
 				return true;
-			  } catch (error) {
-				throw new Error('Error al cambiar contraseña');
-			  }
-			},
-		
-			registrarEntradaCurso: async (_, { studentId, courseCode, ubicacion, ip, mac },ctx) => {
-			  const token = ctx.token; 
-			  if (!token) {
+			} catch (error) {
+				throw error;
+				// throw new Error('Error al cambiar contraseña');
+			}
+		},
+		registrarEntradaCurso: async (_, { studentId, courseCode, ubicacion, ip, mac }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
 				throw new Error('No autorizado: El token es necesario');
-			  }
-			  const attendanceId = uuidv4();
-		
-			  const params = {
-				TableName: 'Asistencias',
-				Item: {
-				  id: attendanceId,
-				  studentId,
-				  courseCode,
-				  entradaFecha: new Date().toISOString(),
-				  entradaUbicacion: ubicacion,
-				  entradaIP: ip,
-				  entradaMAC: mac
-				}
-			  };
-		
-			  try {
-				await docClient.send(new PutCommand(params));
-				return {
-				  id: attendanceId,
-				  studentId,
-				  courseCode,
-				  entradaFecha: params.Item.entradaFecha,
-				  entradaUbicacion: ubicacion,
-				  entradaIP: ip,
-				  entradaMAC: mac
-				};
-			  } catch (error) {
-				throw new Error('Error al registrar entrada del curso');
-			  }
-			},
-		
-			registrarSalidaCurso: async (_, { attendanceId, ubicacion, ip, mac }, ctx) => {
-			  const token = ctx.token;  
-			  if (!token) {
+			}
+
+			const params = {
+				studentid: studentId,
+				coursecode: courseCode,
+				entradafecha: new Date().toISOString(),
+				entradaubicacion: ubicacion,
+				entradaip: ip,
+				entradamac: mac
+			};
+
+			const attendanceId = await database.insertAttendance(params);
+			return {
+				id: attendanceId,
+				studentId,
+				courseCode,
+				entradaFecha: params.entradafecha,
+				entradaUbicacion: ubicacion,
+				entradaIP: ip,
+				entradaMAC: mac
+			};
+		},
+		registrarSalidaCurso: async (_, { attendanceId, ubicacion, ip, mac }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
 				throw new Error('No autorizado: El token es necesario');
-			  }
-			  const entradaQuery = {
-				TableName: 'Asistencias',
-				Key: { id: attendanceId }
-			  };
-		
-			  try {
-				const { Item: attendance } = await docClient.send(new GetCommand(entradaQuery));
-		
+			}
+
+			try {
+				const attendance = await database.getAttendanceById(attendanceId);
+
 				if (!attendance) {
-				  throw new Error('Registro de entrada no encontrado');
+					throw new Error('Registro de entrada no encontrado');
 				}
-		
-				const entradaFecha = new Date(attendance.entradaFecha);
+
+				const entradaFecha = new Date(attendance.entradafecha);
 				const salidaFecha = new Date();
 				const totalHoras = (salidaFecha - entradaFecha) / (1000 * 60 * 60);
-		
+
 				const updateParams = {
-				  TableName: 'Asistencias',
-				  Key: { id: attendanceId },
-				  UpdateExpression: 'SET salidaFecha = :salidaFecha, salidaUbicacion = :salidaUbicacion, salidaIP = :salidaIP, salidaMAC = :salidaMAC, totalHoras = :totalHoras',
-				  ExpressionAttributeValues: {
-					':salidaFecha': salidaFecha.toISOString(),
-					':salidaUbicacion': ubicacion,
-					':salidaIP': ip,
-					':salidaMAC': mac,
-					':totalHoras': totalHoras
-				  },
-				  ReturnValues: 'ALL_NEW'
+					salidafecha: salidaFecha.toISOString(),
+					salidaubicacion: ubicacion,
+					salidaip: ip,
+					salidamac: mac,
+					totalhoras: totalHoras
 				};
-		
-				const { Attributes: updatedAttendance } = await docClient.send(new UpdateCommand(updateParams));
-				return updatedAttendance;
-			  } catch (error) {
+
+				const updatedAttendance = await database.addExitToAttendance(attendanceId, updateParams);
+				returnedAttendance = {
+					id: updatedAttendance.id,
+					studentId: updatedAttendance.studentid,
+					courseCode: updatedAttendance.coursecode,
+					entradaFecha: updatedAttendance.entradafecha,
+					salidaFecha: updatedAttendance.salidafecha,
+					entradaUbicacion: updatedAttendance.entradaubicacion,
+					salidaubicacion: updatedAttendance.salidaubicacion,
+					entradaIP: updatedAttendance.entradaip,
+					salidaIP: updatedAttendance.salidaip,
+					entradaMAC: updatedAttendance.entradamac,
+					salidaMAC: updatedAttendance.salidamac,
+					totalHoras: updatedAttendance.totalhoras
+				};
+				return returnedAttendance;
+			} catch (error) {
 				throw new Error('Error al registrar salida del curso');
-			  }
-			} 
-			  */
+			}
+		}
 	}
 };
 

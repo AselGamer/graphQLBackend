@@ -3,7 +3,7 @@ const { gql } = require('apollo-server');
 const typeDefs = gql`
   type Student {
     id: ID!
-    nombre: String!
+    name: String!
     email: String!
     password: String!
     curso: String
@@ -31,9 +31,8 @@ const typeDefs = gql`
 
   type Query {
     obtenerAlumno(id: ID!): Student
-	  #    obtenerAsistencias(studentId: ID!): [Attendance!]!
-	  #    obtenerHorasAsistencia(studentId: ID!): Float!
-	  #    obtenerStudentId(token: String!): ID
+	obtenerAsistencias(studentId: ID!): [Attendance!]!
+	obtenerHorasAsistencia(studentId: ID!): Float!
   }
 
 type Mutation {
@@ -42,32 +41,28 @@ type Mutation {
 		email: String!
 		password: String!
 	): AuthPayload!
-		#
-		#	iniciarSesion(
-		#		email: String!
-		#		password: String!
-		#	): AuthPayload!
-		#
-		#	cambiarContrasena(
-		#		email: String!
-		#		contrasenaActual: String!
-		#		contrasenaNueva: String!
-		#	): Boolean!
-		#
-		#	registrarEntradaCurso(
-		#		studentId: ID!
-		#		courseCode: String!
-		#		ubicacion: String!
-		#		ip: String!
-		#		mac: String!
-		#	): Attendance!
-		#
-		#	registrarSalidaCurso(
-		#		attendanceId: ID!
-		#		ubicacion: String!
-		#		ip: String!
-		#		mac: String!
-		#	): Attendance!
+	iniciarSesion(
+		email: String!
+		password: String!
+	): AuthPayload!
+	cambiarContrasena(
+		email: String!
+		contrasenaActual: String!
+		contrasenaNueva: String!
+	): Boolean!
+	registrarEntradaCurso(
+		studentId: ID!
+		courseCode: String!
+		ubicacion: String!
+		ip: String!
+		mac: String!
+	): Attendance!
+	registrarSalidaCurso(
+		attendanceId: ID!
+		ubicacion: String!
+		ip: String!
+		mac: String!
+	): Attendance!
 }
 `;
 
