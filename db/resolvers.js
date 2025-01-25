@@ -121,8 +121,7 @@ const resolvers = {
 				await database.updatePassword(student.id, hashedNewPassword);
 				return true;
 			} catch (error) {
-				throw error;
-				// throw new Error('Error al cambiar contraseña');
+				throw new Error('Error al cambiar contraseña');
 			}
 		},
 		registrarEntradaCurso: async (_, { studentId, courseCode, ubicacion, ip, mac }, ctx) => {
