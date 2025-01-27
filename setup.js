@@ -37,4 +37,13 @@ CREATE TABLE attendances (
 			CONSTRAINT attendance_students_fk FOREIGN KEY (studentid) REFERENCES public.students(id)
 );`;
 
+await sql`
+CREATE TABLE public.absences (
+		id int NOT NULL,
+		studentid int NOT NULL,
+		fecha varchar NOT NULL,
+		CONSTRAINT absences_pk PRIMARY KEY (id),
+		CONSTRAINT absences_students_fk FOREIGN KEY (studentid) REFERENCES public.students(id)
+);`;
+
 process.exit();

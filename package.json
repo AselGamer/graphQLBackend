@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node .",
     "dev": "nodemon .",
-	"setup": "node setup.js"
+    "setup": "node setup.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,8 @@
     "dotenv": "^16.4.7",
     "graphql": "^16.10.0",
     "jsonwebtoken": "^9.0.2",
+    "moment": "^2.30.1",
+    "node-schedule": "^2.1.1",
     "postgres": "^3.4.5",
     "uuid": "^11.0.3"
   },

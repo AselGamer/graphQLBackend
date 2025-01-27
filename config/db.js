@@ -40,6 +40,10 @@ class Database {
 		return resp[0];
 	}
 
+	async addAbsences(date) {
+		console.log(date);
+	}
+
 	async attendanceByStudentId(studentid) {
 		const resp = await this.sql`
 			select
