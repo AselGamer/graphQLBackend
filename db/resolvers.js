@@ -33,6 +33,28 @@ const resolvers = {
 
 			try {
 				const attendances = await database.attendanceByStudentId(studentId);
+				attendances.map(item => {
+					item.studentId = item.studentid;
+					item.courseCode = item.coursecode;
+					item.entradaFecha = new Date(item.entradafecha).toISOString();
+					item.salidaFecha = new Date(item.salidafecha).toISOString();
+					item.entradaUbicacion = item.entradaubicacion;
+					item.salidaUbicacion = item.salidaubicacion;
+					item.entradaIp = item.entradaip;
+					item.salidaIp = item.salidaip;
+					item.entradaMAC = item.entradamac;
+					item.salidaMAC = item.salidamac;
+					item.totalHoras = item.totalhoras;
+					delete item.studentid;
+					delete item.coursecode;
+					delete item.entradafecha;
+					delete item.salidafecha;
+					delete item.entradaip;
+					delete item.salidaip;
+					delete item.entradamac;
+					delete item.salidamac;
+				});
+				console.log(attendances);
 				return attendances;
 			} catch (error) {
 				throw error;
