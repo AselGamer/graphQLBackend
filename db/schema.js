@@ -24,6 +24,12 @@ const typeDefs = gql`
     totalHoras: Float
   }
 
+  type Absence {
+   id: ID!
+   studentid: ID!
+   fecha: String!
+  }
+
   type AuthPayload {
     token: String!
     student: Student!
@@ -33,6 +39,9 @@ const typeDefs = gql`
     obtenerAlumno(id: ID!): Student
 	obtenerAsistencias(studentId: ID!): [Attendance!]!
 	obtenerHorasAsistencia(studentId: ID!): Float!
+	obtenerFaltasPorEstudiante(studentId: ID!): [Absence!]!
+    obtenerFalta(id: ID!): Absence
+    obtenerFaltas: [Absence!]!
   }
 
 type Mutation {
@@ -63,6 +72,13 @@ type Mutation {
 		ip: String!
 		mac: String!
 	): Attendance!
+	registrarFalta(
+		studentId: ID!,
+		fecha: String!
+	): Absence!
+    eliminarFalta(
+		id: ID!
+	): Boolean!
 }
 `;
 

@@ -2,6 +2,7 @@
   "name": "apiproyecto",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node .",
     "dev": "nodemon .",
@@ -16,15 +17,12 @@
     "@aws-sdk/client-dynamodb": "^3.713.0",
     "@aws-sdk/lib-dynamodb": "^3.713.0",
     "apollo-server": "^3.13.0",
-    "aws-sdk": "^2.1692.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.7",
     "graphql": "^16.10.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
-    "node-schedule": "^2.1.1",
-    "postgres": "^3.4.5",
-    "uuid": "^11.0.3"
+    "postgres": "^3.4.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"

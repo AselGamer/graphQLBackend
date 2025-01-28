@@ -1,9 +1,7 @@
 const Database = require('../config/db');
-const { PutCommand, GetCommand, UpdateCommand, ScanCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config({ path: 'variables.env' });
-const { v4: uuidv4 } = require('uuid');
 const database = new Database();
 
 //Crear y firmas un JWT
@@ -40,7 +38,6 @@ const resolvers = {
 				throw error;
 			}
 		},
-
 		obtenerHorasAsistencia: async (_, { studentId }, ctx) => {
 			const token = ctx.token;
 			if (!token) {
@@ -51,6 +48,42 @@ const resolvers = {
 				const attendances = await database.getAllAtendancesByStudentId(studentId);
 				const totalHoras = attendances.reduce((sum, asistencia) => sum + (asistencia.totalhoras || 0), 0);
 				return totalHoras;
+			} catch (error) {
+				throw error;
+			}
+		},
+		obtenerFalta: async (_, { id }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
+				throw new Error('No autorizado: El token es necesario');
+			}
+
+			try {
+				return await database.getAbsenceById(id);
+			} catch (error) {
+				throw error;
+			}
+		},
+		obtenerFaltas: async (_, { }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
+				throw new Error('No autorizado: El token es necesario');
+			}
+
+			try {
+				return await database.getAbsences();
+			} catch (error) {
+				throw error;
+			}
+		},
+		obtenerFaltasPorEstudiante: async (_, { studentId }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
+				throw new Error('No autorizado: El token es necesario');
+			}
+
+			try {
+				return await database.getAbsencesByStudentId(studentId);
 			} catch (error) {
 				throw error;
 			}
@@ -194,7 +227,33 @@ const resolvers = {
 			} catch (error) {
 				throw new Error('Error al registrar salida del curso');
 			}
-		}
+		},
+		registrarFalta: async (_, { studentId, fecha }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
+				throw new Error('No autorizado: El token es necesario');
+			}
+
+			try {
+				return await database.createAbsence(studentId, new Date(Date.parse(fecha)));
+			} catch (error) {
+				throw error;
+				throw new Error('Error al registrar falta');
+			}
+		},
+		eliminarFalta: async (_, { id }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
+				throw new Error('No autorizado: El token es necesario');
+			}
+
+			try {
+				const deleted = await database.deleteAbsence(id);
+				return !!deleted;
+			} catch (error) {
+				throw new Error('Error al eliminar falta');
+			}
+		},
 	}
 };
 

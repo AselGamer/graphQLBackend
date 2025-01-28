@@ -40,10 +40,6 @@ class Database {
 		return resp[0];
 	}
 
-	async addAbsences(date) {
-		console.log(date);
-	}
-
 	async attendanceByStudentId(studentid) {
 		const resp = await this.sql`
 			select
@@ -110,11 +106,47 @@ class Database {
 		return resp;
 	}
 
+	async getAbsenceById(id) {
+		const resp = await this.sql`
+        select
+            id,
+            studentid,
+            fecha
+        from absences
+        where
+            id = ${id}
+    `;
+		return resp[0];
+	}
+
+	async getAbsences() {
+		const resp = await this.sql`
+        select
+            id,
+            studentid,
+            fecha
+        from absences
+    `;
+		return resp;
+	}
+
+	async getAbsencesByStudentId(studentId) {
+		const resp = await this.sql`
+        select
+            id,
+            studentid,
+            fecha
+        from absences
+        where
+            studentid = ${studentId}
+    `;
+		return resp;
+	}
+
 	async insertStudent(student) {
 		await this.sql`insert into students ${this.sql(student, 'name', 'email', 'password')
 			}`;
 	}
-
 	async insertAttendance(attendance) {
 		const resp = await this.sql`insert into attendances ${this.sql(attendance, 'studentid', 'coursecode', 'entradafecha', 'entradaubicacion', 'entradaip', 'entradamac')} returning id`;
 		return resp[0]['id'];
@@ -127,6 +159,42 @@ class Database {
 
 	async updatePassword(id, newPassword) {
 		await this.sql`update students set password = ${newPassword} where id = ${id}`;
+	}
+	async createAbsence(studentId, fecha) {
+		const resp = await this.sql`
+        insert into absences (
+            studentid,
+            fecha
+        ) values (
+            ${studentId},
+            ${fecha}
+        )
+        returning id, studentid, fecha
+    `;
+		return resp[0];
+	}
+
+	async updateAbsence(id, studentId, fecha) {
+		const resp = await this.sql`
+        update absences
+        set
+            studentid = ${studentId},
+            fecha = ${fecha}
+        where
+            id = ${id}
+        returning id, studentid, fecha
+    `;
+		return resp[0];
+	}
+
+	async deleteAbsence(id) {
+		const resp = await this.sql`
+        delete from absences
+        where
+            id = ${id}
+        returning id
+    `;
+		return resp[0];
 	}
 }
 
