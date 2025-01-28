@@ -54,7 +54,6 @@ const resolvers = {
 					delete item.entradamac;
 					delete item.salidamac;
 				});
-				console.log(attendances);
 				return attendances;
 			} catch (error) {
 				throw error;
@@ -93,7 +92,11 @@ const resolvers = {
 			}
 
 			try {
-				return await database.getAbsences();
+				const resp = await database.getAbsences();
+				resp.map(item => {
+					item.fecha = new Date(item.fecha).toISOString()
+				});
+				return resp;
 			} catch (error) {
 				throw error;
 			}
@@ -105,7 +108,11 @@ const resolvers = {
 			}
 
 			try {
-				return await database.getAbsencesByStudentId(studentId);
+				const resp = await database.getAbsencesByStudentId(studentId);
+				resp.map(item => {
+					item.fecha = new Date(item.fecha).toISOString()
+				});
+				return resp;
 			} catch (error) {
 				throw error;
 			}
@@ -257,7 +264,9 @@ const resolvers = {
 			}
 
 			try {
-				return await database.createAbsence(studentId, new Date(Date.parse(fecha)));
+				resp = await database.createAbsence(studentId, new Date(Date.parse(fecha)));
+				resp.fecha = new Date(resp.fecha).toISOString();
+				return resp;
 			} catch (error) {
 				throw error;
 				throw new Error('Error al registrar falta');
