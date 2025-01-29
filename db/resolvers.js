@@ -33,6 +33,23 @@ const resolvers = {
 				throw error;
 			}
 		},
+		obtenerAlumnos: async (_, { id }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
+				throw new Error('No autorizado: El token es necesario');
+			}
+
+			if (!database.isTeacher(ctx.alumno.email)) {
+				throw new Error('No autorizado: es necesario ser profesor');
+			}
+
+			try {
+				const students = await database.allStudents();
+				return students;
+			} catch (error) {
+				throw error;
+			}
+		},
 		obtenerAsistencias: async (_, { studentId }, ctx) => {
 			const token = ctx.token;
 			if (!token) {
@@ -107,6 +124,8 @@ const resolvers = {
 				const resp = await database.getAbsences();
 				resp.map(item => {
 					item.fecha = new Date(item.fecha).toISOString()
+					item.student = item.name;
+					delete item.name;
 				});
 				return resp;
 			} catch (error) {

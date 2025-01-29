@@ -37,6 +37,12 @@ const typeDefs = gql`
    fecha: String!
   }
 
+  type AbsenceWithName {
+	  id: ID!
+	  student: String!
+	  fecha: String!
+  }
+
   type AuthPayload {
     token: String!
     student: Student!
@@ -49,12 +55,13 @@ const typeDefs = gql`
 
   type Query {
     obtenerAlumno(id: ID!): Student
+    obtenerAlumnos: [Student!]!
     comprobarSesion: Boolean
 	obtenerAsistencias(studentId: ID!): [Attendance!]!
 	obtenerHorasAsistencia(studentId: ID!): Float!
 	obtenerFaltasPorEstudiante(studentId: ID!): [Absence!]!
     obtenerFalta(id: ID!): Absence
-    obtenerFaltas: [Absence!]!
+    obtenerFaltas: [AbsenceWithName!]!
   }
 
 type Mutation {

@@ -136,10 +136,11 @@ class Database {
 	async getAbsences() {
 		const resp = await this.sql`
         select
-            id,
-            studentid,
-            fecha
-        from absences
+            a.id,
+            s.name,
+            a.fecha
+        from absences a
+		inner join students s on s.id = a.studentid
     `;
 		return resp;
 	}
@@ -227,6 +228,18 @@ class Database {
 			where email = ${email}
 		`;
 		return !!resp;
+	}
+
+	async allStudents() {
+		const resp = await this.sql`
+			select
+				id,
+				name,
+				email,
+				password
+			from students
+		`;
+		return resp;
 	}
 }
 
