@@ -91,6 +91,10 @@ const resolvers = {
 				throw new Error('No autorizado: El token es necesario');
 			}
 
+			if(!database.isTeacher(ctx.alumno.email)) {
+				throw new Error('No autorizado: es necesario ser profesor');
+			}
+
 			try {
 				const resp = await database.getAbsences();
 				resp.map(item => {
@@ -105,6 +109,10 @@ const resolvers = {
 			const token = ctx.token;
 			if (!token) {
 				throw new Error('No autorizado: El token es necesario');
+			}
+
+			if(!database.isTeacher(ctx.alumno.email)) {
+				throw new Error('No autorizado: es necesario ser profesor');
 			}
 
 			try {
@@ -141,6 +149,27 @@ const resolvers = {
 			}
 		},
 
+		registrarProfesor: async (_, { nombre, email, password }) => {
+			const hashedPassword = await bcrypt.hash(password, 10);
+
+			const params = {
+				name: nombre,
+				email: email,
+				password: hashedPassword
+			};
+
+			try {
+				const teacher = await database.insertTeacher(params);
+				const token = crearToken(teacher, process.env.SECRET, '4hr');
+				return {
+					token,
+					teacher
+				};
+			} catch (error) {
+				throw error;
+			}
+		},
+
 		iniciarSesion: async (_, { email, password }) => {
 			try {
 				const student = await database.studentByEmail(email);
@@ -154,6 +183,25 @@ const resolvers = {
 				return {
 					token,
 					student
+				};
+			} catch (error) {
+				throw error;
+			}
+		},
+
+		iniciarSesionProfesor: async (_, { email, password }) => {
+			try {
+				const teacher = await database.teacherByEmail(email);
+
+				const isValid = await bcrypt.compare(password, teacher.password);
+				if (!isValid) {
+					throw new Error('Credenciales inválidas');
+				}
+
+				const token = crearToken(teacher, process.env.SECRET, '4hr');
+				return {
+					token,
+					teacher
 				};
 			} catch (error) {
 				throw error;

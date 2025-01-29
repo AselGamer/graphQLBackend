@@ -9,6 +9,13 @@ const typeDefs = gql`
     curso: String
   }
 
+  type Teacher {
+	  id: ID!
+	  name: String!
+      email: String!
+	  password: String!
+  }
+
   type Attendance {
     id: ID!
     studentId: ID!
@@ -35,6 +42,11 @@ const typeDefs = gql`
     student: Student!
   }
 
+  type AuthPayloadTeacher {
+    token: String!
+    teacher: Teacher!
+  }
+
   type Query {
     obtenerAlumno(id: ID!): Student
 	obtenerAsistencias(studentId: ID!): [Attendance!]!
@@ -50,10 +62,19 @@ type Mutation {
 		email: String!
 		password: String!
 	): AuthPayload!
+	registrarProfesor(
+		nombre: String!
+		email: String!
+		password: String!
+	): AuthPayloadTeacher!
 	iniciarSesion(
 		email: String!
 		password: String!
 	): AuthPayload!
+	iniciarSesionProfesor(
+		email: String!
+		password: String!
+	): AuthPayloadTeacher!
 	cambiarContrasena(
 		email: String!
 		contrasenaActual: String!

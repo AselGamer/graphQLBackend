@@ -40,6 +40,20 @@ class Database {
 		return resp[0];
 	}
 
+	async teacherByEmail(email) {
+		const resp = await this.sql`
+			select
+				id,
+				name,
+				email,
+				password
+			from teachers
+			where
+				email = ${email}
+		`;
+		return resp[0];
+	}
+
 	async attendanceByStudentId(studentid) {
 		const resp = await this.sql`
 			select
@@ -147,6 +161,14 @@ class Database {
 		await this.sql`insert into students ${this.sql(student, 'name', 'email', 'password')
 			}`;
 	}
+
+	async insertTeacher(teacher) {
+		const resp = await this.sql`insert into teachers ${this.sql(teacher, 'name', 'email', 'password')
+			} returning id, name, email, password`;
+		return resp[0];
+
+	}
+
 	async insertAttendance(attendance) {
 		const resp = await this.sql`insert into attendances ${this.sql(attendance, 'studentid', 'coursecode', 'entradafecha', 'entradaubicacion', 'entradaip', 'entradamac')} returning id`;
 		return resp[0]['id'];
@@ -195,6 +217,16 @@ class Database {
         returning id
     `;
 		return resp[0];
+	}
+
+	async isTeacher(email) {
+		const resp = await this.sql`
+		select 
+			id 
+		from teachers 
+			where email = ${email}
+		`;
+		return !!resp;
 	}
 }
 
