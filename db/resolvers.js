@@ -12,6 +12,14 @@ const crearToken = (alumno, secreta, expiresIn) => {
 
 const resolvers = {
 	Query: {
+		comprobarSesion: async (_, { }, ctx) => {
+			const token = ctx.token;
+			if (!token) {
+				throw new Error('No autorizado: El token es necesario');
+			}
+
+			return jwt.verify(token.replace('Bearer ', ''), process.env.SECRET) !== 'invalidToken';
+		},
 		obtenerAlumno: async (_, { id }, ctx) => {
 			const token = ctx.token;
 			if (!token) {
@@ -91,7 +99,7 @@ const resolvers = {
 				throw new Error('No autorizado: El token es necesario');
 			}
 
-			if(!database.isTeacher(ctx.alumno.email)) {
+			if (!database.isTeacher(ctx.alumno.email)) {
 				throw new Error('No autorizado: es necesario ser profesor');
 			}
 
@@ -111,7 +119,7 @@ const resolvers = {
 				throw new Error('No autorizado: El token es necesario');
 			}
 
-			if(!database.isTeacher(ctx.alumno.email)) {
+			if (!database.isTeacher(ctx.alumno.email)) {
 				throw new Error('No autorizado: es necesario ser profesor');
 			}
 

@@ -49,6 +49,7 @@ const typeDefs = gql`
 
   type Query {
     obtenerAlumno(id: ID!): Student
+    comprobarSesion: Boolean
 	obtenerAsistencias(studentId: ID!): [Attendance!]!
 	obtenerHorasAsistencia(studentId: ID!): Float!
 	obtenerFaltasPorEstudiante(studentId: ID!): [Absence!]!
